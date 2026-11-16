@@ -1,7 +1,12 @@
 import { hasSupabaseConfig } from './supabase';
 import { supabaseApi } from './supabaseApi';
 
-const BASE=import.meta.env.VITE_API_URL || '/api';
+const configuredApiUrl = import.meta.env.VITE_API_URL?.trim();
+const BASE = import.meta.env.PROD
+  ? configuredApiUrl && /^https?:\/\//i.test(configuredApiUrl)
+    ? configuredApiUrl.replace(/\/+$/, '')
+    : 'https://nailtechback.onrender.com/api'
+  : configuredApiUrl || '/api';
 
 export async function api<T>(path:string, init?:RequestInit):Promise<T>{
  if(hasSupabaseConfig) return supabaseApi<T>(path,init);
