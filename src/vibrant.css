@@ -208,15 +208,24 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
 .hero-migrating-butterfly .butterfly-wing-right { transform-origin: 0% 54%; }
 .hero-migrating-butterfly .butterfly-wing-left { animation-name: butterfly-wing-flap-left; }
 .hero-migrating-butterfly .butterfly-wing-right { animation-name: butterfly-wing-flap-right; }
+.hero-migrating-butterfly-large .butterfly-wing-pair { filter: saturate(1.3) contrast(1.06); }
 .hero-migrating-butterfly .butterfly-wing-shape { stroke: var(--butterfly-edge); stroke-width: 2.2; stroke-linejoin: round; }
 .hero-migrating-butterfly .butterfly-wing-vein { fill: none; stroke: color-mix(in srgb, var(--butterfly-detail) 82%, var(--butterfly-edge)); stroke-width: 1.05; stroke-linecap: round; opacity: .8; }
 .hero-migrating-butterfly .butterfly-wing-mark { fill: none; stroke: var(--butterfly-detail); stroke-width: 2.6; stroke-linecap: round; opacity: .92; }
 .hero-migrating-butterfly .butterfly-wing-spot { fill: var(--butterfly-detail); stroke: var(--butterfly-edge); stroke-width: .8; }
 .hero-migrating-butterfly .butterfly-wing-spot-ring { fill: none; stroke: var(--butterfly-highlight); stroke-width: .85; opacity: .9; }
-.hero-migrating-butterfly .butterfly-body,
-.hero-migrating-butterfly .butterfly-antennae { fill: var(--butterfly-body-color); stroke: var(--butterfly-body-color); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.hero-migrating-butterfly .butterfly-antennae { fill: none; stroke-width: 1.25; }
+.hero-migrating-butterfly .butterfly-head,
+.hero-migrating-butterfly .butterfly-thorax,
+.hero-migrating-butterfly .butterfly-abdomen { stroke: #49352d; stroke-width: .7; }
+.hero-migrating-butterfly .butterfly-eye { fill: #30221d; }
+.hero-migrating-butterfly .butterfly-abdomen-segment { fill: none; stroke: #d3b18a; stroke-width: .65; stroke-linecap: round; opacity: .78; }
+.hero-migrating-butterfly .butterfly-leg { fill: none; stroke: #594133; stroke-width: .7; stroke-linecap: round; stroke-linejoin: round; }
+.hero-migrating-butterfly .butterfly-thorax { filter: drop-shadow(0 .5px .5px rgba(40,25,18,.3)); }
+.hero-migrating-butterfly .butterfly-body-highlight { fill: none; stroke: #e0c29e; stroke-width: .85; stroke-linecap: round; opacity: .9; }
+.hero-migrating-butterfly .butterfly-antennae { fill: none; stroke: #594133; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.hero-migrating-butterfly-large .butterfly-insect-body { filter: drop-shadow(0 1px 1.1px rgba(37,23,17,.42)); }
 .hero-floating-heart { position: absolute; color: var(--hero-accent, var(--rose)); opacity: .14; animation: hero-heart-float 9s ease-in-out infinite; }
+.hero-mobile-flower { display: none; }
 .hero-touch-wave-group { position: absolute; z-index: 1; width: 1px; height: 1px; color: var(--wave-color, var(--rose)); pointer-events: none; }
 .hero-touch-ripple { position: absolute; top: 0; left: 0; width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 50%; box-shadow: 0 0 16px color-mix(in srgb, currentColor 45%, transparent), inset 0 0 8px color-mix(in srgb, currentColor 20%, transparent); animation: hero-touch-wave 1.15s var(--wave-delay, 0ms) cubic-bezier(.16,.7,.25,1) forwards; }
 .falling-botanical { position: absolute; top: -12%; display: block; width: 26px; height: 26px; opacity: 0; animation: botanical-fall var(--fall-duration, 14s) linear infinite; }
@@ -610,7 +619,14 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
   .booking-page-hero .rose-showcase-image { transform: perspective(1100px) rotateX(7deg) rotateY(var(--rose-drag-turn, 0deg)) scale(1.08); }
   .booking-page-hero .booking-page-copy { min-width: 0; }
   .booking-page-hero .booking-page-copy h1 { font-size: clamp(2.4rem, 11vw, 3.5rem); }
-  .vibrant-hero .hero-copy { padding: 55px 24px; }
+  .vibrant-hero .hero-copy { z-index: auto; padding: 55px 24px; }
+  .vibrant-hero .hero-copy > :not(.hero-mobile-flower) { position: relative; z-index: 4; }
+  .vibrant-hero .hero-migration-layer { z-index: 3; }
+  .vibrant-hero .hero-migrating-butterfly { left: 0 !important; top: 0 !important; animation-name: hero-butterfly-mobile; animation-duration: max(42s, var(--butterfly-duration, 42s)); animation-timing-function: cubic-bezier(.45,0,.25,1); }
+  .vibrant-hero .hero-actions { position: relative; isolation: isolate; }
+  .vibrant-hero .hero-actions > a { position: relative; z-index: 4; }
+  .vibrant-hero .proof > div { position: relative; z-index: 4; }
+  .vibrant-hero .hero-mobile-flower { position: absolute; z-index: 1; left: calc(100% - 35vw); bottom: 20px; display: block; width: clamp(110px, 34vw, 128px); height: 200px; object-fit: contain; object-position: center bottom; opacity: .34; pointer-events: none; filter: drop-shadow(0 10px 16px rgba(39,13,30,.2)); }
   .hero-art.vibrant-hero-art { min-height: 420px; }
   .hero-promo { width: min(220px, 72%); }
   .lookbook-grid { columns: 2 150px; column-gap: 10px; }
@@ -804,6 +820,16 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
   76% { opacity: .76; transform: translate3d(17vw, 23vh, 0) rotate(11deg) scale(.94); }
   90% { transform: translate3d(26vw, 7vh, 0) rotate(-7deg) scale(.9); }
   100% { opacity: 0; transform: translate3d(38vw, -12vh, 0) rotate(12deg) scale(.8); }
+}
+@keyframes hero-butterfly-mobile {
+  0% { opacity: 0; transform: translate3d(var(--mobile-start-x), var(--mobile-start-y), 0) rotate(-18deg) scale(.78); }
+  12% { opacity: .84; transform: translate3d(var(--mobile-start-x), var(--mobile-start-y), 0) rotate(-8deg) scale(.86); }
+  32% { transform: translate3d(var(--mobile-mid-x), var(--mobile-mid-y), 0) rotate(9deg) scale(.96); }
+  43% { transform: translate3d(var(--mobile-land-x), calc(var(--mobile-land-y) - 8vh), 0) rotate(-5deg) scale(.9); }
+  55% { opacity: .94; transform: translate3d(var(--mobile-land-x), var(--mobile-land-y), 0) rotate(4deg) scale(.82); }
+  70% { opacity: .94; transform: translate3d(var(--mobile-land-x), var(--mobile-land-y), 0) rotate(4deg) scale(.82); }
+  75% { transform: translate3d(calc(var(--mobile-land-x) + 7vw), calc(var(--mobile-land-y) - 7vh), 0) rotate(12deg) scale(.92); }
+  100% { opacity: 0; transform: translate3d(var(--mobile-exit-x), var(--mobile-exit-y), 0) rotate(18deg) scale(.76); }
 }
 @keyframes butterfly-wing-flap-left { from { transform: perspective(140px) rotateY(2deg) scaleX(1); } to { transform: perspective(140px) rotateY(64deg) scaleX(.94); } }
 @keyframes butterfly-wing-flap-right { from { transform: perspective(140px) rotateY(-2deg) scaleX(1); } to { transform: perspective(140px) rotateY(-64deg) scaleX(.94); } }
@@ -1105,6 +1131,13 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
 .admin-portfolio-item img { display: block; width: 100%; height: 190px; object-fit: cover; }
 .admin-portfolio-item > div { display: grid; gap: 7px; padding: 0 11px 11px; }
 .admin-portfolio-item small { color: var(--muted); }
+.admin-service-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); align-items: end; gap: 12px; margin: 18px 0 22px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: color-mix(in srgb, var(--rose) 4%, var(--card)); }
+.admin-service-form label { display: grid; gap: 6px; color: var(--muted); font-size: 10px; font-weight: 700; }
+.admin-service-form input, .admin-service-form textarea { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font: inherit; }
+.admin-service-form textarea { resize: vertical; }
+.admin-service-description { grid-column: 1 / -1; }
+.admin-service-form .admin-payout-button { min-height: 40px; }
+.admin-service-form .admin-payout-button svg, .admin-panel-heading .admin-payout-button svg { width: 14px; vertical-align: middle; }
 .admin-portfolio-item .admin-payout-button { justify-self: start; }
 .staff-invite-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: var(--paper); }
 .staff-invite-card { width: min(460px, 100%); }

@@ -12,19 +12,33 @@ import type { PortfolioItem } from '../types';
 
 const categories = ['All', 'Gel', 'Acrylic', 'Nail Art', 'Self Care'];
 const waveColors = ['#ec4899', '#a855f7', '#f472b6'];
+const mobileButterflyFlights = [
+  { startX: '-12vw', startY: '8vh', midX: '8vw', midY: '12vh', landX: '14vw', landY: '17vh', exitX: '112vw', exitY: '-8vh' },
+  { startX: '108vw', startY: '14vh', midX: '90vw', midY: '17vh', landX: '85vw', landY: '22vh', exitX: '-28vw', exitY: '-12vh' },
+  { startX: '-14vw', startY: '25vh', midX: '10vw', midY: '27vh', landX: '20vw', landY: '31vh', exitX: '110vw', exitY: '-5vh' },
+  { startX: '112vw', startY: '32vh', midX: '92vw', midY: '34vh', landX: '80vw', landY: '38vh', exitX: '-25vw', exitY: '-10vh' },
+  { startX: '-12vw', startY: '41vh', midX: '34vw', midY: '41vh', landX: '42vw', landY: '46vh', exitX: '114vw', exitY: '-8vh' },
+  { startX: '108vw', startY: '19vh', midX: '83vw', midY: '45vh', landX: '60vw', landY: '51vh', exitX: '-24vw', exitY: '-12vh' },
+  { startX: '-15vw', startY: '53vh', midX: '32vw', midY: '56vh', landX: '34vw', landY: '60vh', exitX: '112vw', exitY: '-7vh' },
+  { startX: '114vw', startY: '58vh', midX: '90vw', midY: '59vh', landX: '84vw', landY: '64vh', exitX: '-26vw', exitY: '-11vh' },
+  { startX: '-12vw', startY: '21vh', midX: '28vw', midY: '25vh', landX: '28vw', landY: '29vh', exitX: '113vw', exitY: '-10vh' },
+  { startX: '112vw', startY: '43vh', midX: '76vw', midY: '42vh', landX: '72vw', landY: '47vh', exitX: '-25vw', exitY: '-8vh' },
+  { startX: '-13vw', startY: '12vh', midX: '70vw', midY: '48vh', landX: 'calc(82vw - 24px)', landY: '50vh', exitX: '112vw', exitY: '-9vh' },
+  { startX: '113vw', startY: '18vh', midX: '89vw', midY: '30vh', landX: '87vw', landY: '35vh', exitX: '-25vw', exitY: '-11vh' },
+];
 const migratingButterflies = [
-  { left: '0%', top: '0%', size: 30, duration: '29s', delay: '-2s', curve: '-7vh', wing: '#ed8b26', highlight: '#f6c95d', detail: '#281a1b', edge: '#352020', body: '#2b1b1b', flap: '1.2s' },
-  { left: '10%', top: '2%', size: 24, duration: '34s', delay: '-9s', curve: '8vh', wing: '#327ac7', highlight: '#8ed5ff', detail: '#e9f8ff', edge: '#173c69', body: '#222641', flap: '1.35s' },
-  { left: '3%', top: '7%', size: 27, duration: '31s', delay: '-5s', curve: '-4vh', wing: '#d86781', highlight: '#f8b4bd', detail: '#fff0d9', edge: '#71394c', body: '#38202f', flap: '1.45s' },
-  { left: '20%', top: '0%', size: 22, duration: '36s', delay: '-13s', curve: '6vh', wing: '#8371bd', highlight: '#d4c7f5', detail: '#fff3d4', edge: '#443a73', body: '#292239', flap: '1.3s' },
-  { left: '27%', top: '4%', size: 25, duration: '32s', delay: '-16s', curve: '-9vh', wing: '#4d9479', highlight: '#b8dda2', detail: '#f8f0d7', edge: '#285745', body: '#22372f', flap: '1.55s' },
-  { left: '12%', top: '8%', size: 24, duration: '33s', delay: '-7s', curve: '5vh', wing: '#d7a643', highlight: '#ffe49a', detail: '#fff5dd', edge: '#72511e', body: '#3e2e20', flap: '1.4s' },
-  { left: '35%', top: '1%', size: 21, duration: '38s', delay: '-12s', curve: '-6vh', wing: '#4293a7', highlight: '#a5e5e7', detail: '#f2fff8', edge: '#245366', body: '#233747', flap: '1.25s' },
-  { left: '6%', top: '10%', size: 23, duration: '30s', delay: '-3s', curve: '8vh', wing: '#b64d8d', highlight: '#f2a1cb', detail: '#fff1de', edge: '#693658', body: '#3a2638', flap: '1.5s' },
-  { left: '25%', top: '10%', size: 20, duration: '35s', delay: '-15s', curve: '-5vh', wing: '#67765a', highlight: '#c9d89a', detail: '#fff6db', edge: '#384832', body: '#28332a', flap: '1.65s' },
-  { left: '39%', top: '8%', size: 22, duration: '37s', delay: '-18s', curve: '7vh', wing: '#9167a4', highlight: '#d8b7e5', detail: '#fff2db', edge: '#574066', body: '#30273c', flap: '1.3s' },
-  { left: '58%', top: '2%', size: 54, duration: '48s', delay: '-21s', curve: '-11vh', wing: '#e88931', highlight: '#ffe28a', detail: '#37201d', edge: '#5e3028', body: '#302020', flap: '1.7s', large: true },
-  { left: '67%', top: '4%', size: 50, duration: '52s', delay: '-34s', curve: '10vh', wing: '#477eb7', highlight: '#b8e4f4', detail: '#fff4d7', edge: '#263d6e', body: '#20243a', flap: '1.85s', large: true },
+  { left: '0%', top: '0%', size: 30, duration: '29s', delay: '-2s', curve: '-7vh', wing: '#ed8b26', highlight: '#f6c95d', detail: '#281a1b', edge: '#352020', flap: '1.2s' },
+  { left: '10%', top: '2%', size: 24, duration: '34s', delay: '-9s', curve: '8vh', wing: '#327ac7', highlight: '#8ed5ff', detail: '#e9f8ff', edge: '#173c69', flap: '1.35s' },
+  { left: '3%', top: '7%', size: 27, duration: '31s', delay: '-5s', curve: '-4vh', wing: '#d86781', highlight: '#f8b4bd', detail: '#fff0d9', edge: '#71394c', flap: '1.45s' },
+  { left: '20%', top: '0%', size: 22, duration: '36s', delay: '-13s', curve: '6vh', wing: '#8371bd', highlight: '#d4c7f5', detail: '#fff3d4', edge: '#443a73', flap: '1.3s' },
+  { left: '27%', top: '4%', size: 25, duration: '32s', delay: '-16s', curve: '-9vh', wing: '#4d9479', highlight: '#b8dda2', detail: '#f8f0d7', edge: '#285745', flap: '1.55s' },
+  { left: '12%', top: '8%', size: 24, duration: '33s', delay: '-7s', curve: '5vh', wing: '#d7a643', highlight: '#ffe49a', detail: '#fff5dd', edge: '#72511e', flap: '1.4s' },
+  { left: '35%', top: '1%', size: 21, duration: '38s', delay: '-12s', curve: '-6vh', wing: '#4293a7', highlight: '#a5e5e7', detail: '#f2fff8', edge: '#245366', flap: '1.25s' },
+  { left: '6%', top: '10%', size: 23, duration: '30s', delay: '-3s', curve: '8vh', wing: '#b64d8d', highlight: '#f2a1cb', detail: '#fff1de', edge: '#693658', flap: '1.5s' },
+  { left: '25%', top: '10%', size: 20, duration: '35s', delay: '-15s', curve: '-5vh', wing: '#67765a', highlight: '#c9d89a', detail: '#fff6db', edge: '#384832', flap: '1.65s' },
+  { left: '39%', top: '8%', size: 22, duration: '37s', delay: '-18s', curve: '7vh', wing: '#9167a4', highlight: '#d8b7e5', detail: '#fff2db', edge: '#574066', flap: '1.3s' },
+  { left: '58%', top: '2%', size: 54, duration: '48s', delay: '-21s', curve: '-11vh', wing: '#e88931', highlight: '#ffe28a', detail: '#37201d', edge: '#5e3028', flap: '1.7s', large: true },
+  { left: '67%', top: '4%', size: 50, duration: '52s', delay: '-34s', curve: '10vh', wing: '#477eb7', highlight: '#b8e4f4', detail: '#fff4d7', edge: '#263d6e', flap: '1.85s', large: true },
 ];
 const floatingHearts = [
   { left: '18%', top: '70%', size: 18, delay: '-2s' },
@@ -39,10 +53,41 @@ export default function Home() {
   const [lookError, setLookError] = useState('');
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number; color: string }[]>([]);
   const rippleId = useRef(0);
+  const heroRef = useRef<HTMLElement>(null);
+  const [headlineLandings, setHeadlineLandings] = useState<{ x: number; y: number }[]>([]);
   const { data: reviews } = useReviews();
   const content = useSiteSettings();
   const directionsUrl = studioDirectionsUrlFor(content.address || studioAddress);
   const featuredReview = reviews[0];
+  useEffect(() => {
+    const hero = heroRef.current;
+    const heading = hero?.querySelector('h1');
+    if (!hero || !heading) return;
+
+    const updateHeadlineLandings = () => {
+      const range = document.createRange();
+      range.selectNodeContents(heading);
+      const heroBounds = hero.getBoundingClientRect();
+      const points = Array.from(range.getClientRects()).slice(0, 4).map((line) => ({
+        x: Math.round(line.left + line.width * 0.72 - heroBounds.left),
+        y: Math.round(line.top + line.height / 2 - heroBounds.top),
+      }));
+      setHeadlineLandings((current) =>
+        current.length === points.length && current.every((point, index) =>
+          point.x === points[index].x && point.y === points[index].y
+        ) ? current : points
+      );
+    };
+
+    updateHeadlineLandings();
+    const observer = new ResizeObserver(updateHeadlineLandings);
+    observer.observe(heading);
+    window.addEventListener('resize', updateHeadlineLandings);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateHeadlineLandings);
+    };
+  }, [content.home_title]);
   const handleHeroPointerDown = (event: PointerEvent<HTMLElement>) => {
     if (!content.touch_wave_enabled) return;
     if (event.target instanceof Element && event.target.closest('button, a, input')) return;
@@ -62,15 +107,28 @@ export default function Home() {
     });
   }, []);
   const filteredLooks = activeFilter === 'All' ? looks : looks.filter((look) => look.category === activeFilter);
+  const visibleButterflies = [
+    ...migratingButterflies.slice(0, Math.min(content.butterfly_count, migratingButterflies.length - 2)),
+    ...(content.butterfly_count > 0 ? migratingButterflies.slice(-2) : []),
+  ];
 
   return (
     <>
       <section
+        ref={heroRef}
         className="hero vibrant-hero"
         onPointerDown={handleHeroPointerDown}
       >
         <div className="hero-migration-layer" aria-hidden="true">
-          {[...migratingButterflies.slice(0, Math.min(content.butterfly_count, migratingButterflies.length - 2)), ...(content.butterfly_count > 0 ? migratingButterflies.slice(-2) : [])].map((butterfly, index) => (
+          {visibleButterflies.map((butterfly, index) => {
+            const baseFlight = butterfly.large
+              ? mobileButterflyFlights[10 + index - (visibleButterflies.length - 2)]
+              : mobileButterflyFlights[index];
+            const headlineLanding = butterfly.large ? undefined : headlineLandings[index];
+            const mobileFlight = headlineLanding
+              ? { ...baseFlight, landX: `${headlineLanding.x}px`, landY: `${headlineLanding.y}px` }
+              : baseFlight;
+            return (
             <span
               className={`hero-migrating-butterfly${butterfly.large ? ' hero-migrating-butterfly-large' : ''}`}
               key={index}
@@ -85,8 +143,15 @@ export default function Home() {
                 '--butterfly-highlight': butterfly.highlight,
                 '--butterfly-detail': butterfly.detail,
                 '--butterfly-edge': butterfly.edge,
-                '--butterfly-body-color': butterfly.body,
                 '--butterfly-flap-duration': butterfly.flap,
+                '--mobile-start-x': mobileFlight.startX,
+                '--mobile-start-y': mobileFlight.startY,
+                '--mobile-mid-x': mobileFlight.midX,
+                '--mobile-mid-y': mobileFlight.midY,
+                '--mobile-land-x': `calc(${mobileFlight.landX} - ${butterfly.size / 2}px)`,
+                '--mobile-land-y': `calc(${mobileFlight.landY} - ${butterfly.size * 0.625}px)`,
+                '--mobile-exit-x': mobileFlight.exitX,
+                '--mobile-exit-y': mobileFlight.exitY,
               } as CSSProperties}
             >
               <svg viewBox="0 0 64 80">
@@ -96,32 +161,55 @@ export default function Home() {
                     <stop offset=".52" stopColor={butterfly.wing} />
                     <stop offset="1" stopColor={butterfly.edge} />
                   </linearGradient>
+                    <linearGradient id={`butterfly-body-${index}`} x1="29" y1="20" x2="35" y2="68" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#c99a68" />
+                      <stop offset=".35" stopColor="#806047" />
+                      <stop offset="1" stopColor="#49352d" />
+                  </linearGradient>
                 </defs>
-                <g className="butterfly-wing butterfly-wing-left">
-                  <path className="butterfly-wing-shape" fill={`url(#butterfly-wing-${index})`} d="M30 37C22 23 15 7 8 7 2 7 2 18 5 28 8 39 17 46 29 48Z" />
-                  <path className="butterfly-wing-shape" fill={`url(#butterfly-wing-${index})`} d="M29 43C19 40 11 43 9 51 7 59 12 70 20 72 26 73 31 63 32 51Z" />
-                  <path className="butterfly-wing-vein" d="M28 42 10 12M28 44 6 25M27 46 12 46M28 47 12 56M29 49 20 67M27 42 19 14M25 44 10 34M27 48 15 51M29 51 23 63" />
-                  <path className="butterfly-wing-mark" d="m10 12 2-2m4 8 2-2m3 8 2-2" />
-                  <circle className="butterfly-wing-spot-ring" cx="15" cy="57" r="3.1" />
-                  <circle className="butterfly-wing-spot" cx="15" cy="57" r="1.6" />
-                  <circle className="butterfly-wing-spot-ring" cx="20" cy="64" r="2.6" />
-                  <circle className="butterfly-wing-spot" cx="20" cy="64" r="1.2" />
+                <g
+                  className="butterfly-wing-pair"
+                  transform={butterfly.large ? 'translate(-2.56 -3.2) scale(1.08)' : undefined}
+                >
+                  <g className="butterfly-wing butterfly-wing-left">
+                    <path className="butterfly-wing-shape" fill={`url(#butterfly-wing-${index})`} d="M30 37C22 23 15 7 8 7 2 7 2 18 5 28 8 39 17 46 29 48Z" />
+                    <path className="butterfly-wing-shape" fill={`url(#butterfly-wing-${index})`} d="M29 43C19 40 11 43 9 51 7 59 12 70 20 72 26 73 31 63 32 51Z" />
+                    <path className="butterfly-wing-vein" d="M28 42 10 12M28 44 6 25M27 46 12 46M28 47 12 56M29 49 20 67M27 42 19 14M25 44 10 34M27 48 15 51M29 51 23 63" />
+                    <path className="butterfly-wing-mark" d="m10 12 2-2m4 8 2-2m3 8 2-2" />
+                    <circle className="butterfly-wing-spot-ring" cx="15" cy="57" r="3.1" />
+                    <circle className="butterfly-wing-spot" cx="15" cy="57" r="1.6" />
+                    <circle className="butterfly-wing-spot-ring" cx="20" cy="64" r="2.6" />
+                    <circle className="butterfly-wing-spot" cx="20" cy="64" r="1.2" />
+                  </g>
+                  <g className="butterfly-wing butterfly-wing-right">
+                    <path className="butterfly-wing-shape" fill={`url(#butterfly-wing-${index})`} d="M34 37C42 23 49 7 56 7 62 7 62 18 59 28 56 39 47 46 35 48Z" />
+                    <path className="butterfly-wing-shape" fill={`url(#butterfly-wing-${index})`} d="M35 43C45 40 53 43 55 51 57 59 52 70 44 72 38 73 33 63 32 51Z" />
+                    <path className="butterfly-wing-vein" d="m36 42 18-30m-18 32 22-19m-21 21h15m-16 1 15 10m-16-8 9 18m-1-55-8 28m9-14L42 44m-5 4 12 3m-13 4 6 12" />
+                    <path className="butterfly-wing-mark" d="m54 12-2-2m-4 8-2-2m-3 8-2-2" />
+                    <circle className="butterfly-wing-spot-ring" cx="49" cy="57" r="3.1" />
+                    <circle className="butterfly-wing-spot" cx="49" cy="57" r="1.6" />
+                    <circle className="butterfly-wing-spot-ring" cx="44" cy="64" r="2.6" />
+                    <circle className="butterfly-wing-spot" cx="44" cy="64" r="1.2" />
+                  </g>
                 </g>
-                <g className="butterfly-wing butterfly-wing-right">
-                  <path className="butterfly-wing-shape" fill={`url(#butterfly-wing-${index})`} d="M34 37C42 23 49 7 56 7 62 7 62 18 59 28 56 39 47 46 35 48Z" />
-                  <path className="butterfly-wing-shape" fill={`url(#butterfly-wing-${index})`} d="M35 43C45 40 53 43 55 51 57 59 52 70 44 72 38 73 33 63 32 51Z" />
-                  <path className="butterfly-wing-vein" d="m36 42 18-30m-18 32 22-19m-21 21h15m-16 1 15 10m-16-8 9 18m-1-55-8 28m9-14L42 44m-5 4 12 3m-13 4 6 12" />
-                  <path className="butterfly-wing-mark" d="m54 12-2-2m-4 8-2-2m-3 8-2-2" />
-                  <circle className="butterfly-wing-spot-ring" cx="49" cy="57" r="3.1" />
-                  <circle className="butterfly-wing-spot" cx="49" cy="57" r="1.6" />
-                  <circle className="butterfly-wing-spot-ring" cx="44" cy="64" r="2.6" />
-                  <circle className="butterfly-wing-spot" cx="44" cy="64" r="1.2" />
+                <g
+                  className="butterfly-insect-body"
+                  transform={butterfly.large ? 'translate(13.44 16.8) scale(.58)' : 'translate(8.96 11.2) scale(.72)'}
+                >
+                  <path className="butterfly-antennae" d="M31 20C28 13 25 11 22 10m11 10c3-7 6-9 9-10" />
+                  <circle className="butterfly-head" fill={`url(#butterfly-body-${index})`} cx="32" cy="21" r="2.7" />
+                  <circle className="butterfly-eye" cx="30.3" cy="20.7" r=".55" />
+                  <circle className="butterfly-eye" cx="33.7" cy="20.7" r=".55" />
+                  <ellipse className="butterfly-thorax" fill={`url(#butterfly-body-${index})`} cx="32" cy="29" rx="3.1" ry="6.3" />
+                  <path className="butterfly-abdomen" fill={`url(#butterfly-body-${index})`} d="M29.2 34Q32 31 34.8 34L34.5 49Q34 54 32 57Q30 54 29.5 49Z" />
+                  <path className="butterfly-abdomen-segment" d="M29.5 39Q32 40.5 34.5 39M29.5 43Q32 44.5 34.5 43M29.5 47Q32 48.5 34.5 47M29.8 51Q32 52.2 34.2 51M30.5 54.5Q32 55.2 33.5 54.5" />
+                  <path className="butterfly-leg" d="M29 28Q26 30 25 34L23 36M29 31Q25 32 24 36L22 38M30 34Q27 36 27 39L25 41M35 28Q38 30 39 34L41 36M35 31Q39 32 40 36L42 38M34 34Q37 36 37 39L39 41" />
+                  <path className="butterfly-body-highlight" d="M31.1 19.5v3m.1 5v8m-.1 4v16" />
                 </g>
-                <path className="butterfly-antennae" d="M31 19C28 13 25 11 22 10m11 9c3-6 6-8 9-9" />
-                <path className="butterfly-body" d="M32 17c-2 0-3 2-3 5s1 4 3 4 3-2 3-4-1-5-3-5Zm0 9v20c0 5-2 10-3 15m3-15c0 5 2 10 3 15" />
               </svg>
             </span>
-          ))}
+            );
+          })}
           {floatingHearts.map((heart, index) => (
             <Heart
               className="hero-floating-heart"
@@ -160,6 +248,7 @@ export default function Home() {
           <div className="hero-actions">
             <Link className="primary" to="/book">Design your set <ArrowRight /></Link>
             <Link className="text-link" to="/gallery"><Camera /> View our work</Link>
+            <img className="hero-mobile-flower" src={content.hero_rose_image_url} alt="" aria-hidden="true" />
           </div>
           <div className="proof">
             <div><strong>500+</strong><span>happy clients</span></div>
