@@ -27,6 +27,19 @@ function ensureClient() {
   return supabase;
 }
 
+async function requireAdmin(client: NonNullable<typeof supabase>) {
+  const { data: userData, error: userError } = await client.auth.getUser();
+  if (userError) throw userError;
+  if (!userData.user) throw new Error('Sign in with an owner account to manage the lookbook.');
+  const { data: profile, error: profileError } = await client
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', userData.user.id)
+    .maybeSingle();
+  if (profileError) throw profileError;
+  if (!profile?.is_admin) throw new Error('Only an authorized site administrator can manage the lookbook.');
+}
+
 export async function supabaseApi<T>(path: string, init?: RequestInit): Promise<T> {
   const client = ensureClient();
   const method = (init?.method ?? 'GET').toUpperCase();
@@ -54,6 +67,12 @@ export async function supabaseApi<T>(path: string, init?: RequestInit): Promise<
     result = content;
   } else if (url.pathname === '/admin/services' && method === 'GET') {
     const { data, error } = await client.from('salon_services').select('*').order('category').order('name');
+    if (error) throw error;
+    result = data;
+  } else if (url.pathname === '/admin/services' && method === 'POST') {
+    await requireAdmin(client);
+    const service = requestBody<Database['public']['Tables']['salon_services']['Insert']>(init);
+    const { data, error } = await client.from('salon_services').insert(service).select('*').single();
     if (error) throw error;
     result = data;
   } else if (/^\/admin\/services\/\d+$/.test(url.pathname) && method === 'PATCH') {
@@ -96,6 +115,23 @@ export async function supabaseApi<T>(path: string, init?: RequestInit): Promise<
     result = { status: 'submitted' };
   } else if (url.pathname === '/portfolio' && method === 'GET') {
     const { data, error } = await client.from('portfolio_items').select('*').eq('is_published', true).order('created_at', { ascending: false });
+    if (error) throw error;
+    result = data;
+  } else if (url.pathname === '/admin/portfolio' && method === 'GET') {
+    const { data, error } = await client.from('portfolio_items').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    result = data;
+  } else if (url.pathname === '/admin/portfolio' && method === 'POST') {
+    await requireAdmin(client);
+    const item = requestBody<Database['public']['Tables']['portfolio_items']['Insert']>(init);
+    const { data, error } = await client.from('portfolio_items').insert(item).select('*').single();
+    if (error) throw error;
+    result = data;
+  } else if (/^\/admin\/portfolio\/\d+$/.test(url.pathname) && method === 'PUT') {
+    await requireAdmin(client);
+    const id = Number(url.pathname.split('/').at(-1));
+    const updates = requestBody<Database['public']['Tables']['portfolio_items']['Update']>(init);
+    const { data, error } = await client.from('portfolio_items').update(updates).eq('id', id).select('*').single();
     if (error) throw error;
     result = data;
   } else if (url.pathname === '/events' && method === 'GET') {

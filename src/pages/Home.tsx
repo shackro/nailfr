@@ -50,15 +50,20 @@ const floatingHearts = [
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [looks, setLooks] = useState<PortfolioItem[]>([]);
+  const [looksLoading, setLooksLoading] = useState(true);
   const [lookError, setLookError] = useState('');
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number; color: string }[]>([]);
   const rippleId = useRef(0);
   const heroRef = useRef<HTMLElement>(null);
   const [headlineLandings, setHeadlineLandings] = useState<{ x: number; y: number }[]>([]);
-  const { data: reviews } = useReviews();
+  const { data: reviews, loading: reviewsLoading } = useReviews();
   const content = useSiteSettings();
   const directionsUrl = studioDirectionsUrlFor(content.address || studioAddress);
   const featuredReview = reviews[0];
+  const happyClientCount = reviews.filter((review) => review.rating >= 4).length;
+  const averageRating = reviews.length
+    ? (reviews.reduce((total, review) => total + review.rating, 0) / reviews.length).toFixed(1)
+    : '—';
   useEffect(() => {
     const hero = heroRef.current;
     const heading = hero?.querySelector('h1');
@@ -104,7 +109,7 @@ export default function Home() {
   useEffect(() => {
     api<PortfolioItem[]>('/portfolio').then(setLooks).catch((requestError: unknown) => {
       setLookError(requestError instanceof Error ? requestError.message : 'Could not load the lookbook.');
-    });
+    }).finally(() => setLooksLoading(false));
   }, []);
   const filteredLooks = activeFilter === 'All' ? looks : looks.filter((look) => look.category === activeFilter);
   const visibleButterflies = [
@@ -251,9 +256,9 @@ export default function Home() {
             <img className="hero-mobile-flower" src={content.hero_rose_image_url} alt="" aria-hidden="true" />
           </div>
           <div className="proof">
-            <div><strong>500+</strong><span>happy clients</span></div>
-            <div><strong>50+</strong><span>signature designs</span></div>
-            <div><strong>4.9</strong><span><Star /> client rating</span></div>
+            <div><strong>{reviewsLoading ? '…' : happyClientCount}</strong><span>happy clients</span></div>
+            <div><strong>{looksLoading ? '…' : looks.length}</strong><span>signature designs</span></div>
+            <div><strong>{reviewsLoading ? '…' : averageRating}</strong><span><Star /> client rating</span></div>
           </div>
         </div>
         <div className="hero-art vibrant-hero-art">

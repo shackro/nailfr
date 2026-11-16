@@ -56,7 +56,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <header className="nav">
         <Link className="brand" to="/">
           <span className="brand-mark"><FlowerMark /></span>
-          <span>{content.business_name.toUpperCase()}<small>S PA & NAILS</small></span>
+          <span>{content.business_name.toUpperCase()}<small>SPA & NAILS</small></span>
         </Link>
         <nav ref={menuRef} className={`nav-links${open ? ' open' : ''}`} id="primary-navigation" aria-label="Main navigation">
           <div className="mobile-nav-heading">

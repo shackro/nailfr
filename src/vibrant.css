@@ -416,21 +416,24 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
 .affiliate-otp { margin-top: 16px; }
 .affiliate-otp p { font-size: 12px; color: var(--muted); }
 
-.admin-vibrant { min-height: 100vh; display: block; background: var(--paper); }
-.admin-vibrant-side { position: fixed; inset: 0 auto 0 0; width: 250px; height: 100vh; z-index: 20; padding: 25px 18px; display: flex; flex-direction: column; background: var(--card); border-right: 1px solid var(--line); }
-.admin-logo { display: flex; align-items: center; gap: 10px; font-weight: 900; color: var(--ink); padding: 4px 8px 26px; border-bottom: 1px solid var(--line); }
+.admin-vibrant { min-height: 100vh; display: flex; flex-direction: column; background: var(--paper); }
+.admin-vibrant-side { position: sticky; inset: 0 0 auto; width: 100%; height: auto; z-index: 20; padding: 12px clamp(16px,3vw,40px); display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 18px; background: linear-gradient(180deg, var(--card), color-mix(in srgb, var(--rose) 3%, var(--card))); border: 0; border-bottom: 1px solid var(--line); box-shadow: 0 6px 24px rgba(45,19,37,.06); }
+.admin-logo { display: flex; align-items: center; gap: 10px; font-weight: 900; color: var(--ink); padding: 0; border: 0; white-space: nowrap; }
 .admin-logo>span:last-child, .admin-mobile-logo>b { font-size: 13px; letter-spacing: .04em; }
 .admin-logo>span:last-child>span, .admin-mobile-logo>b>span { color: var(--rose); }
-.admin-side-label { color: var(--muted); font-size: 9px; font-weight: 700; letter-spacing: .16em; margin: 28px 10px 12px; }
-.admin-vibrant-side nav { display: grid; gap: 5px; margin: 0; }
-.admin-vibrant-side nav button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; background: transparent; border: 0; border-radius: 13px; color: var(--muted); text-align: left; font-size: 12px; font-weight: 600; }
-.admin-vibrant-side nav button svg { width: 17px; }
-.admin-vibrant-side nav button.active { background: rgba(236,72,153,.1); color: var(--rose); }
-.admin-side-bottom { margin-top: auto; display: grid; gap: 14px; }
+.admin-side-label { display: none; }
+.admin-vibrant-side nav { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; margin: 0; overflow-x: auto; scrollbar-width: none; }
+.admin-vibrant-side nav::-webkit-scrollbar { display: none; }
+.admin-vibrant-side nav button { display: flex; align-items: center; gap: 8px; width: auto; flex: 0 0 auto; padding: 10px 12px; background: transparent; border: 0; border-radius: 999px; color: var(--muted); text-align: left; font-size: 11px; font-weight: 600; white-space: nowrap; transition: background .2s ease, color .2s ease, transform .2s ease; }
+.admin-vibrant-side nav button svg { width: 17px; flex: 0 0 17px; }
+.admin-vibrant-side nav button:hover { background: color-mix(in srgb, var(--rose) 8%, transparent); color: var(--rose); transform: translateY(-1px); }
+.admin-vibrant-side nav button:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; }
+.admin-vibrant-side nav button.active { background: color-mix(in srgb, var(--rose) 13%, var(--card)); color: var(--rose); box-shadow: inset 0 -2px var(--rose); }
+.admin-side-bottom { margin: 0; display: flex; align-items: center; gap: 12px; white-space: nowrap; }
 .admin-side-bottom a { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 11px; }
 .admin-side-bottom svg { width: 16px; }
 .admin-side-bottom small { color: var(--muted); font-size: 9px; }
-.admin-vibrant-main { max-width: 1500px; min-height: 100vh; margin-left: 250px; padding: 34px clamp(22px,4vw,62px) 70px; background: var(--paper); color: var(--ink); }
+.admin-vibrant-main { width: min(100%, 1500px); max-width: 1500px; min-height: calc(100vh - 70px); margin: 0 auto; padding: 34px clamp(22px,4vw,62px) 70px; background: var(--paper); color: var(--ink); }
 .admin-vibrant-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .admin-vibrant-header small { font-size: 9px; font-weight: 700; letter-spacing: .18em; color: var(--rose); }
 .admin-vibrant-header h1 { font: 30px 'DM Sans',sans-serif; font-weight: 700; letter-spacing: -.04em; margin: 6px 0 0; }
@@ -597,15 +600,10 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
   .event-featured { grid-template-columns: 1fr; }
   .event-featured .event-image { min-height: 280px; }
   .affiliate-page { padding: 50px 24px 75px; }
-  .admin-vibrant-side { width: 72px; padding: 18px 9px; }
-  .admin-logo { justify-content: center; padding: 0 0 20px; }
-  .admin-logo>span:last-child, .admin-side-label, .admin-vibrant-side nav button:not(.active) { font-size: 0; }
-  .admin-vibrant-side nav button { justify-content: center; padding: 13px 5px; font-size: 0; }
-  .admin-vibrant-side nav button svg { width: 19px; }
-  .admin-side-bottom { justify-items: center; }
-  .admin-side-bottom a { font-size: 0; }
-  .admin-side-bottom small { display: none; }
-  .admin-vibrant-main { margin-left: 72px; padding: 28px 20px 55px; }
+  .admin-vibrant-side { position: sticky; inset: 0 0 auto; grid-template-columns: minmax(0,1fr) auto; gap: 8px 14px; padding: 12px 20px; }
+  .admin-vibrant-side nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; }
+  .admin-side-bottom { grid-column: 2; grid-row: 1; }
+  .admin-vibrant-main { width: 100%; margin: 0; padding: 28px 20px 55px; }
   .admin-vibrant-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
 
@@ -646,14 +644,15 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
   .affiliate-steps { grid-template-columns: 1fr; }
   .affiliate-activity { overflow-x: auto; }
   .affiliate-activity table { min-width: 590px; }
-  .admin-vibrant-side { position: static; width: auto; height: auto; padding: 10px 14px; border-right: 0; border-bottom: 1px solid var(--line); }
-  .admin-vibrant { display: flex; flex-direction: column; }
+  .admin-vibrant-side { position: sticky; inset: 0 0 auto; width: 100%; height: auto; grid-template-columns: minmax(0,1fr); gap: 0; padding: 8px 10px; border: 0; border-bottom: 1px solid var(--line); }
   .admin-logo { display: none; }
   .admin-side-label, .admin-side-bottom { display: none; }
-  .admin-vibrant-side nav { display: flex; justify-content: space-between; gap: 3px; }
-  .admin-vibrant-side nav button, .admin-vibrant-side nav button:not(.active) { font-size: 8px; flex-direction: column; gap: 4px; padding: 7px 3px; }
+  .admin-vibrant-side nav { grid-column: auto; grid-row: auto; justify-content: flex-start; gap: 6px; overflow-x: auto; padding: 2px 1px 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .admin-vibrant-side nav::-webkit-scrollbar { display: none; }
+  .admin-vibrant-side nav button, .admin-vibrant-side nav button:not(.active) { flex: 0 0 auto; width: auto; flex-direction: row; gap: 7px; padding: 9px 11px; border: 1px solid transparent; border-radius: 999px; font-size: 10px; white-space: nowrap; }
   .admin-vibrant-side nav button svg { width: 17px; }
-  .admin-vibrant-main { margin: 0; padding: 18px 14px 40px; }
+  .admin-vibrant-side nav button.active { border-color: color-mix(in srgb, var(--rose) 24%, transparent); box-shadow: 0 3px 10px color-mix(in srgb, var(--rose) 12%, transparent); }
+  .admin-vibrant-main { width: 100%; margin: 0; padding: 18px 14px 40px; }
   .admin-mobile-logo { display: flex; }
   .admin-vibrant-header { flex-wrap: wrap; gap: 12px; }
   .admin-vibrant-header>div:nth-child(2) { width: 100%; order: 2; }
@@ -663,6 +662,7 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
   .admin-upcoming article>strong { grid-column: 2; }
   .admin-panel { padding: 15px; }
   .admin-panel-heading { align-items: flex-start; flex-direction: column; }
+  .admin-panel-heading > .admin-payout-button { align-self: stretch; justify-content: center; min-height: 42px; }
   .admin-portfolio { grid-template-columns: repeat(2,1fr); }
 }
 
@@ -1127,17 +1127,26 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
 .admin-gallery-form label { display: grid; gap: 6px; color: var(--muted); font-size: 10px; font-weight: 700; }
 .admin-gallery-form input, .admin-gallery-form select { width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); }
 .admin-gallery-form input[type='file'] { padding: 7px; }
+.admin-portfolio-create-form { margin: 18px 0 22px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: color-mix(in srgb, var(--rose) 4%, var(--card)); }
+.admin-portfolio-image-field small { color: var(--muted); font-size: 9px; font-weight: 400; line-height: 1.4; }
+.admin-portfolio-publish { min-height: 40px; margin: 0; }
+.admin-portfolio-publish input { width: 17px; min-width: 17px; height: 17px; }
 .admin-portfolio-item { display: grid; align-content: start; gap: 9px; overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: var(--paper); }
 .admin-portfolio-item img { display: block; width: 100%; height: 190px; object-fit: cover; }
 .admin-portfolio-item > div { display: grid; gap: 7px; padding: 0 11px 11px; }
 .admin-portfolio-item small { color: var(--muted); }
 .admin-service-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); align-items: end; gap: 12px; margin: 18px 0 22px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: color-mix(in srgb, var(--rose) 4%, var(--card)); }
 .admin-service-form label { display: grid; gap: 6px; color: var(--muted); font-size: 10px; font-weight: 700; }
-.admin-service-form input, .admin-service-form textarea { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font: inherit; }
+.admin-service-form input, .admin-service-form textarea, .admin-service-form select { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font: inherit; }
 .admin-service-form textarea { resize: vertical; }
 .admin-service-description { grid-column: 1 / -1; }
 .admin-service-form .admin-payout-button { min-height: 40px; }
 .admin-service-form .admin-payout-button svg, .admin-panel-heading .admin-payout-button svg { width: 14px; vertical-align: middle; }
+.admin-service-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-category-form { display: flex; align-items: end; gap: 12px; margin: 18px 0 22px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: color-mix(in srgb, var(--rose) 4%, var(--card)); }
+.admin-category-form label { display: grid; flex: 1; gap: 6px; color: var(--muted); font-size: 10px; font-weight: 700; }
+.admin-category-form input { width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); color: var(--ink); font: inherit; }
+.admin-category-form .admin-payout-button { min-height: 40px; }
 .admin-portfolio-item .admin-payout-button { justify-self: start; }
 .staff-invite-page { display: grid; min-height: 100vh; place-items: center; padding: 24px; background: var(--paper); }
 .staff-invite-card { width: min(460px, 100%); }
@@ -1147,3 +1156,13 @@ footer>small { border-color: rgba(131,24,67,.18); color: #6b2341; }
 .staff-invite-card input { width: 100%; margin-top: 3px; padding: 11px 12px; border: 1px solid var(--line); border-radius: 11px; background: var(--paper); color: var(--ink); }
 .staff-invite-icon { display: grid; width: 46px; height: 46px; place-items: center; margin-bottom: 14px; border-radius: 15px; background: color-mix(in srgb, var(--rose) 14%, transparent); color: var(--rose); }
 .staff-invite-icon svg { width: 24px; }
+
+@media (max-width: 600px) {
+  .admin-vibrant-side { grid-template-columns: minmax(0,1fr); gap: 0; padding: 8px 10px; }
+  .admin-logo, .admin-side-label, .admin-side-bottom { display: none; }
+  .admin-vibrant-side nav { grid-column: auto; grid-row: auto; justify-content: flex-start; gap: 6px; padding: 2px 1px 5px; }
+  .admin-vibrant-side nav button,
+  .admin-vibrant-side nav button:not(.active) { flex: 0 0 auto; width: auto; flex-direction: row; gap: 7px; padding: 9px 11px; border-radius: 999px; font-size: 10px; white-space: nowrap; }
+}
+
+.admin.admin-vibrant .admin-vibrant-side nav { flex-direction: row; margin: 0; }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, CalendarDays, CheckCircle2, Clock3, Image, LayoutDashboard, LogOut, Moon, Radio, Search, Settings, Sun, Users, UserPlus, Save, Copy, ShoppingBag } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, CheckCircle2, Clock3, Image, LayoutDashboard, LogOut, Moon, Radio, Search, Settings, Sun, Users, UserPlus, Save, Copy, ShoppingBag, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useBookings } from '../lib/dataHooks';
@@ -16,8 +16,40 @@ type StaffMember = { email: string; name: string; phone: string | null; role: St
 type LocalStaff = { email: string; name: string; role: StaffRole };
 type InviteForm = { name: string; email: string; phone: string; role: 'nail_tech' | 'reception_manager' };
 type GallerySubmission = { title: string; category: string; services: string; price: number };
+type PortfolioDraft = { title: string; category: string; image: string; services: string; price: number };
+type VisualImageField = 'hero_rose_image_url' | 'booking_rose_image_url';
+type ServiceDraft = Pick<Service, 'name' | 'category' | 'price' | 'duration' | 'description'>;
 type AffiliateSummary = { count: number; referrals: number; pending: number; paid: number };
 type AffiliateRow = { code: string; phone: string; referrals: number; pending: number; paid: number };
+
+async function uploadImage(file: File): Promise<string> {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+    throw new Error('Choose a JPG, PNG, or WebP image.');
+  }
+  if (!file.size || file.size > 5 * 1024 * 1024) {
+    throw new Error('Choose an image smaller than 5 MB.');
+  }
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('The image file could not be read.'));
+    reader.onload = () => typeof reader.result === 'string'
+      ? resolve(reader.result)
+      : reject(new Error('The image file could not be read.'));
+    reader.readAsDataURL(file);
+  });
+  const separator = dataUrl.indexOf(',');
+  if (separator < 0) throw new Error('The image file could not be encoded.');
+  const media = await api<{ url: string }>('/admin/media', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: file.name,
+      mime_type: file.type,
+      content_base64: dataUrl.slice(separator + 1),
+    }),
+  });
+  return media.url;
+}
+
 const navItems: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'bookings', label: 'Bookings', icon: CalendarDays },
@@ -37,7 +69,23 @@ export default function Admin() {
   const [affiliateRows, setAffiliateRows] = useState<AffiliateRow[]>([]);
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<string[]>([]);
   const [savingServiceId, setSavingServiceId] = useState<number | null>(null);
+  const [serviceDraft, setServiceDraft] = useState<ServiceDraft>({ name: '', category: '', price: 0, duration: 30, description: '' });
+  const [addingService, setAddingService] = useState(false);
+  const [serviceFormOpen, setServiceFormOpen] = useState(false);
+  const [categoryFormOpen, setCategoryFormOpen] = useState(false);
+  const [categoryDraft, setCategoryDraft] = useState('');
+  const [addingCategory, setAddingCategory] = useState(false);
+  const [serviceMessage, setServiceMessage] = useState('');
+  const [portfolioDraft, setPortfolioDraft] = useState<PortfolioDraft>({ title: '', category: 'Nail Art', image: '', services: '', price: 0 });
+  const [portfolioImageFile, setPortfolioImageFile] = useState<File | null>(null);
+  const portfolioImageInputRef = useRef<HTMLInputElement>(null);
+  const [portfolioFormOpen, setPortfolioFormOpen] = useState(false);
+  const [publishPortfolioImmediately, setPublishPortfolioImmediately] = useState(true);
+  const [savingPortfolio, setSavingPortfolio] = useState(false);
+  const [uploadingVisualImage, setUploadingVisualImage] = useState<VisualImageField | null>(null);
+  const [portfolioMessage, setPortfolioMessage] = useState('');
   const [galleryFile, setGalleryFile] = useState<File | null>(null);
   const galleryFileInputRef = useRef<HTMLInputElement>(null);
   const [gallerySubmission, setGallerySubmission] = useState<GallerySubmission>({ title: '', category: 'Nail Art', services: '', price: 0 });
@@ -84,15 +132,17 @@ export default function Admin() {
     setLoading(true);
     setError('');
     const contentRequest = canManageContent
-      ? api<PortfolioItem[]>(hasSupabaseConfig ? '/portfolio' : '/admin/portfolio')
+      ? api<PortfolioItem[]>('/admin/portfolio')
       : Promise.resolve([]);
     const servicesRequest = canManageContent ? api<Service[]>('/admin/services') : Promise.resolve([]);
+    const categoriesRequest = canManageContent ? api<string[]>('/admin/service-categories') : Promise.resolve([]);
     const ownerRequest = isOwner
       ? Promise.all([api<AffiliateSummary>('/affiliates/summary'), api<AffiliateRow[]>('/admin/affiliates')])
       : Promise.resolve(null);
-    void Promise.all([refreshBookings(), contentRequest, servicesRequest, ownerRequest]).then(([, items, serviceItems, finance]) => {
+    void Promise.all([refreshBookings(), contentRequest, servicesRequest, categoriesRequest, ownerRequest]).then(([, items, serviceItems, categories, finance]) => {
       setPortfolio(items);
       setServices(serviceItems);
+      setServiceCategories(categories);
       if (finance) {
         setAffiliateSummary(finance[0]);
         setAffiliateRows(finance[1]);
@@ -100,6 +150,28 @@ export default function Admin() {
     }).catch((requestError: unknown) => {
       setError(requestError instanceof Error ? requestError.message : 'Could not load studio data.');
     }).finally(() => setLoading(false));
+  };
+
+  const createServiceCategory = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAddingCategory(true);
+    setServiceMessage('');
+    setError('');
+    try {
+      const created = await api<{ name: string }>('/admin/service-categories', {
+        method: 'POST',
+        body: JSON.stringify({ name: categoryDraft.trim() }),
+      });
+      setServiceCategories((current) => [...current, created.name].sort((a, b) => a.localeCompare(b)));
+      setServiceDraft((current) => ({ ...current, category: current.category || created.name }));
+      setCategoryDraft('');
+      setCategoryFormOpen(false);
+      setServiceMessage(`${created.name} was added to service categories.`);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Could not add this category.');
+    } finally {
+      setAddingCategory(false);
+    }
   };
 
   useEffect(() => {
@@ -190,6 +262,10 @@ export default function Admin() {
   const todayBookings = bookings.filter((booking) => booking.date === today);
   const completedValue = bookings.filter((booking) => booking.status === 'completed').reduce((sum, booking) => sum + booking.total, 0);
   const pendingCount = bookings.filter((booking) => booking.status === 'pending').length;
+  const serviceCategoryOptions = useMemo(
+    () => [...new Set([...serviceCategories, ...services.map((service) => service.category)])].filter(Boolean).sort((a, b) => a.localeCompare(b)),
+    [serviceCategories, services],
+  );
   const upcoming = useMemo(() => bookings.filter((booking) => booking.date >= today && booking.status !== 'cancelled').slice(0, 5), [bookings, today]);
   const filteredBookings = bookings.filter((booking) => `${booking.name} ${booking.phone} ${booking.services.join(' ')}`.toLowerCase().includes(search.toLowerCase()));
 
@@ -302,45 +378,49 @@ export default function Admin() {
     }
   };
 
+  const createService = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setAddingService(true);
+    setServiceMessage('');
+    setError('');
+    try {
+      const created = await api<Service>('/admin/services', {
+        method: 'POST',
+        body: JSON.stringify({
+          ...serviceDraft,
+          name: serviceDraft.name.trim(),
+          category: serviceDraft.category.trim(),
+          description: serviceDraft.description.trim(),
+        }),
+      });
+      setServices((current) => [...current, created].sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name)));
+      setServiceDraft({ name: '', category: '', price: 0, duration: 30, description: '' });
+      setServiceFormOpen(false);
+      setServiceMessage(`${created.name} was added to the service menu.`);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Could not add this service.');
+    } finally {
+      setAddingService(false);
+    }
+  };
+
   const submitGalleryWork = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!galleryFile) {
       setError('Choose a JPG, PNG or WebP photo to submit.');
       return;
     }
-    if (galleryFile.size > 5 * 1024 * 1024) {
-      setError('Choose an image smaller than 5 MB.');
-      return;
-    }
     setGalleryBusy(true);
     setError('');
     setGalleryMessage('');
     try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onerror = () => reject(new Error('The image file could not be read.'));
-        reader.onload = () => typeof reader.result === 'string'
-          ? resolve(reader.result)
-          : reject(new Error('The image file could not be read.'));
-        reader.readAsDataURL(galleryFile);
-      });
-      const separator = dataUrl.indexOf(',');
-      if (separator < 0) throw new Error('The image file could not be encoded.');
-      const mimeType = galleryFile.type;
-      const media = await api<{ url: string }>('/admin/media', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: galleryFile.name,
-          mime_type: mimeType,
-          content_base64: dataUrl.slice(separator + 1),
-        }),
-      });
+      const image = await uploadImage(galleryFile);
       await api('/admin/portfolio', {
         method: 'POST',
         body: JSON.stringify({
           title: gallerySubmission.title.trim(),
           category: gallerySubmission.category,
-          image: media.url,
+          image,
           services: gallerySubmission.services.split(',').map((service) => service.trim()).filter(Boolean),
           price: gallerySubmission.price,
           is_published: false,
@@ -354,6 +434,45 @@ export default function Admin() {
       setError(requestError instanceof Error ? requestError.message : 'Could not submit this gallery photo.');
     } finally {
       setGalleryBusy(false);
+    }
+  };
+
+  const createPortfolioItem = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const enteredImage = portfolioDraft.image.trim();
+    if (!portfolioImageFile && !enteredImage.startsWith('/') && !/^https?:\/\//i.test(enteredImage)) {
+      setError('Use an image URL beginning with https:// or a local /images/ path.');
+      return;
+    }
+
+    setSavingPortfolio(true);
+    setError('');
+    setPortfolioMessage('');
+    try {
+      const image = portfolioImageFile ? await uploadImage(portfolioImageFile) : enteredImage;
+      const created = await api<PortfolioItem>('/admin/portfolio', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: portfolioDraft.title.trim(),
+          category: portfolioDraft.category.trim(),
+          image,
+          services: portfolioDraft.services.split(',').map((service) => service.trim()).filter(Boolean),
+          price: portfolioDraft.price,
+          is_published: publishPortfolioImmediately,
+        }),
+      });
+      setPortfolio((current) => [created, ...current]);
+      setPortfolioDraft({ title: '', category: 'Nail Art', image: '', services: '', price: 0 });
+      setPortfolioImageFile(null);
+      if (portfolioImageInputRef.current) portfolioImageInputRef.current.value = '';
+      setPortfolioFormOpen(false);
+      setPortfolioMessage(publishPortfolioImmediately
+        ? `${created.title} was added to the public lookbook.`
+        : `${created.title} was saved as a draft.`);
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Could not add this lookbook item.');
+    } finally {
+      setSavingPortfolio(false);
     }
   };
 
@@ -387,6 +506,22 @@ export default function Admin() {
       setError(requestError instanceof Error ? requestError.message : 'Could not save site controls.');
     } finally {
       setSavingSettings(false);
+    }
+  };
+
+  const uploadVisualImage = async (field: VisualImageField, file: File | undefined) => {
+    if (!file) return;
+    setUploadingVisualImage(field);
+    setError('');
+    setSettingsMessage('');
+    try {
+      const imageUrl = await uploadImage(file);
+      setSettings((current) => ({ ...current, [field]: imageUrl }));
+      setSettingsMessage('Image uploaded. Publish changes to apply it to the site.');
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'Could not upload this image.');
+    } finally {
+      setUploadingVisualImage(null);
     }
   };
 
@@ -462,8 +597,8 @@ export default function Admin() {
       <aside className="admin-side admin-vibrant-side">
         <Link to="/" className="admin-logo"><span className="brand-mark"><FlowerMark /></span><span>GLAMOUR<span>ADMIN</span></span></Link>
         <small className="admin-side-label">WORKSPACE</small>
-        <nav>{visibleNavItems.map(({ id, label, icon: Icon }) => (
-          <button type="button" className={activeTab === id ? 'active' : ''} key={id} onClick={() => setActiveTab(id)}><Icon /> {label}</button>
+        <nav aria-label="Admin sections">{visibleNavItems.map(({ id, label, icon: Icon }) => (
+          <button type="button" className={activeTab === id ? 'active' : ''} key={id} onClick={() => setActiveTab(id)} aria-label={label} aria-current={activeTab === id ? 'page' : undefined} title={label}><Icon /> <span>{label}</span></button>
         ))}</nav>
         <div className="admin-side-bottom"><button type="button" onClick={() => void signOut()}><LogOut /> Sign out</button><small>{localStaff?.name ?? 'Glamourglow Spa'} · {currentRole?.replace('_', ' ')}</small></div>
       </aside>
@@ -549,12 +684,28 @@ export default function Admin() {
                   {galleryMessage && <p className="review-success" role="status">{galleryMessage}</p>}
                 </section>
               ) : (
-                <section className="admin-panel"><div className="admin-panel-heading"><div><h2>Portfolio review queue</h2><p>Review drafts from the nail team and publish approved designs to the lookbook.</p></div></div>
+                <section className="admin-panel">
+                  <div className="admin-panel-heading">
+                    <div><h2>Portfolio &amp; lookbook</h2><p>Add new designs, review team submissions, and manage what appears in the public lookbook.</p></div>
+                    {canManageContent && <button type="button" className="admin-payout-button" aria-expanded={portfolioFormOpen} aria-controls="admin-portfolio-form" onClick={() => { setPortfolioFormOpen((open) => !open); setPortfolioMessage(''); }}><Plus /> {portfolioFormOpen ? 'Cancel' : 'Add lookbook item'}</button>}
+                  </div>
+                  {portfolioMessage && <p className="review-success" role="status">{portfolioMessage}</p>}
+                  {canManageContent && portfolioFormOpen && (
+                    <form id="admin-portfolio-form" className="admin-gallery-form admin-portfolio-create-form" onSubmit={(event) => void createPortfolioItem(event)}>
+                      <label>Design title<input required minLength={2} maxLength={160} value={portfolioDraft.title} onChange={(event) => setPortfolioDraft({ ...portfolioDraft, title: event.target.value })} /></label>
+                      <label>Category<select value={portfolioDraft.category} onChange={(event) => setPortfolioDraft({ ...portfolioDraft, category: event.target.value })}><option>Nail Art</option><option>Gel</option><option>Acrylic</option><option>Self Care</option></select></label>
+                      <label>Treatments used<input value={portfolioDraft.services} onChange={(event) => setPortfolioDraft({ ...portfolioDraft, services: event.target.value })} placeholder="Gel, Nail Art" /></label>
+                      <label>Look price (KSh)<input type="number" min="0" step="1" value={portfolioDraft.price} onChange={(event) => setPortfolioDraft({ ...portfolioDraft, price: Number(event.target.value) })} /></label>
+                      <label className="admin-portfolio-image-field">Image URL or local path<input required={!portfolioImageFile} maxLength={2000} value={portfolioDraft.image} onChange={(event) => setPortfolioDraft({ ...portfolioDraft, image: event.target.value })} placeholder="https://… or /images/…" /><small>Paste a URL/path, or choose a JPG, PNG, or WebP image to upload (max 5 MB).</small><input ref={portfolioImageInputRef} aria-label="Upload lookbook image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0] ?? null; setPortfolioImageFile(file); if (file) setPortfolioDraft((current) => ({ ...current, image: '' })); }} />{portfolioImageFile && <small>Selected: {portfolioImageFile.name}</small>}</label>
+                      <label className="admin-settings-toggle admin-portfolio-publish"><span>Publish immediately</span><input type="checkbox" checked={publishPortfolioImmediately} onChange={(event) => setPublishPortfolioImmediately(event.target.checked)} /></label>
+                      <button type="submit" className="admin-payout-button" disabled={savingPortfolio}>{savingPortfolio ? 'Adding…' : 'Add to lookbook'}</button>
+                    </form>
+                  )}
                   <div className="admin-portfolio">{portfolio.map((item) => (
                     <article className="admin-portfolio-item" key={item.id}>
                       <img src={resolveImageSource(item.image)} alt={item.title} loading="lazy" />
                       <div><b>{item.title}</b><small>{item.category} · KSh {item.price.toLocaleString()}</small><span className={`status ${item.is_published ? 'confirmed' : 'pending'}`}>{item.is_published ? 'Published' : 'Draft'}</span>
-                        {!hasSupabaseConfig && <button type="button" className="admin-payout-button" onClick={() => void togglePortfolioPublication(item)}>{item.is_published ? 'Unpublish' : 'Approve & publish'}</button>}
+                        {canManageContent && <button type="button" className="admin-payout-button" onClick={() => void togglePortfolioPublication(item)}>{item.is_published ? 'Unpublish' : 'Approve & publish'}</button>}
                       </div>
                     </article>
                   ))}</div>
@@ -565,13 +716,36 @@ export default function Admin() {
 
             {activeTab === 'services' && (
               <section className="admin-panel">
-                <div className="admin-panel-heading"><div><h2>Service menu</h2><p>{isOwner ? 'Update prices, timing, descriptions, or availability.' : 'Toggle treatments on or off as stock changes.'}</p></div></div>
+                <div className="admin-panel-heading">
+                  <div><h2>Service menu</h2><p>{isOwner ? 'Add treatments and update prices, timing, descriptions, or availability.' : 'Toggle treatments on or off as stock changes.'}</p></div>
+                  {isOwner && <div className="admin-service-actions">
+                    <button type="button" className="admin-payout-button" aria-expanded={categoryFormOpen} aria-controls="admin-category-form" onClick={() => { setCategoryFormOpen((open) => !open); setServiceMessage(''); }}><Plus /> {categoryFormOpen ? 'Cancel category' : 'Add category'}</button>
+                    <button type="button" className="admin-payout-button" aria-expanded={serviceFormOpen} aria-controls="admin-service-form" onClick={() => { setServiceFormOpen((open) => !open); setServiceMessage(''); }}><Plus /> {serviceFormOpen ? 'Cancel service' : 'Add service'}</button>
+                  </div>}
+                </div>
+                {serviceMessage && <p className="review-success" role="status">{serviceMessage}</p>}
+                {isOwner && categoryFormOpen && (
+                  <form id="admin-category-form" className="admin-category-form" onSubmit={(event) => void createServiceCategory(event)}>
+                    <label>New category<input required minLength={2} maxLength={80} value={categoryDraft} onChange={(event) => setCategoryDraft(event.target.value)} placeholder="e.g. Nail extensions" /></label>
+                    <button type="submit" className="admin-payout-button" disabled={addingCategory}>{addingCategory ? 'Adding…' : 'Save category'}</button>
+                  </form>
+                )}
+                {isOwner && serviceFormOpen && (
+                  <form id="admin-service-form" className="admin-service-form" onSubmit={(event) => void createService(event)}>
+                    <label>Service name<input required minLength={2} maxLength={120} value={serviceDraft.name} onChange={(event) => setServiceDraft({ ...serviceDraft, name: event.target.value })} /></label>
+                    <label>Category<select required value={serviceDraft.category} onChange={(event) => setServiceDraft({ ...serviceDraft, category: event.target.value })}><option value="" disabled>Select a category</option>{serviceCategoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}</select></label>
+                    <label>Price (KSh)<input required type="number" min="0" step="1" value={serviceDraft.price} onChange={(event) => setServiceDraft({ ...serviceDraft, price: Number(event.target.value) })} /></label>
+                    <label>Duration (minutes)<input required type="number" min="1" step="1" value={serviceDraft.duration} onChange={(event) => setServiceDraft({ ...serviceDraft, duration: Number(event.target.value) })} /></label>
+                    <label className="admin-service-description">Description<textarea rows={2} maxLength={1000} value={serviceDraft.description} onChange={(event) => setServiceDraft({ ...serviceDraft, description: event.target.value })} /></label>
+                    <button type="submit" className="admin-payout-button" disabled={addingService}>{addingService ? 'Adding…' : 'Add to menu'}</button>
+                  </form>
+                )}
                 <div className="table-wrap">
                   <table><thead><tr><th>Treatment</th><th>Category</th><th>Price (KSh)</th><th>Minutes</th><th>Available</th><th></th></tr></thead>
                     <tbody>{services.map((service) => (
                       <tr key={service.id}>
                         <td>{isOwner ? <input aria-label={`${service.name} name`} value={service.name} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, name: event.target.value } : item))} /> : service.name}</td>
-                        <td>{isOwner ? <input aria-label={`${service.name} category`} value={service.category} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, category: event.target.value } : item))} /> : service.category}</td>
+                        <td>{isOwner ? <select aria-label={`${service.name} category`} value={service.category} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, category: event.target.value } : item))}>{serviceCategoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}</select> : service.category}</td>
                         <td>{isOwner ? <input aria-label={`${service.name} price`} type="number" min="0" value={service.price} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, price: Number(event.target.value) } : item))} /> : service.price.toLocaleString()}</td>
                         <td>{isOwner ? <input aria-label={`${service.name} duration`} type="number" min="1" value={service.duration} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, duration: Number(event.target.value) } : item))} /> : service.duration}</td>
                         <td><input aria-label={`${service.name} available`} type="checkbox" checked={Boolean(service.is_active)} onChange={(event) => setServices((current) => current.map((item) => item.id === service.id ? { ...item, is_active: event.target.checked } : item))} /></td>
@@ -610,7 +784,9 @@ export default function Admin() {
                   </fieldset>
                   {isOwner && <fieldset><legend>Visuals & business rules</legend>
                     <label>Homepage rose image URL<input maxLength={2000} value={settings.hero_rose_image_url} onChange={(event) => setSettings({ ...settings, hero_rose_image_url: event.target.value })} /></label>
+                    <label>Upload homepage rose image<input aria-label="Upload homepage rose image" type="file" accept="image/jpeg,image/png,image/webp" disabled={uploadingVisualImage !== null} onChange={(event) => void uploadVisualImage('hero_rose_image_url', event.target.files?.[0])} /><small>{uploadingVisualImage === 'hero_rose_image_url' ? 'Uploading…' : 'JPG, PNG, or WebP · max 5 MB'}</small></label>
                     <label>Booking rose image URL<input maxLength={2000} value={settings.booking_rose_image_url} onChange={(event) => setSettings({ ...settings, booking_rose_image_url: event.target.value })} /></label>
+                    <label>Upload booking rose image<input aria-label="Upload booking rose image" type="file" accept="image/jpeg,image/png,image/webp" disabled={uploadingVisualImage !== null} onChange={(event) => void uploadVisualImage('booking_rose_image_url', event.target.files?.[0])} /><small>{uploadingVisualImage === 'booking_rose_image_url' ? 'Uploading…' : 'JPG, PNG, or WebP · max 5 MB'}</small></label>
                     <label>Small butterflies · {settings.butterfly_count}<input type="range" min="0" max="10" value={settings.butterfly_count} onChange={(event) => setSettings({ ...settings, butterfly_count: Number(event.target.value) })} /></label>
                     {settings.butterfly_count > 0 && <small className="admin-settings-hint">Two larger butterflies are also shown while the effect is enabled.</small>}
                     <label className="admin-settings-toggle">Tap ripple waves<input type="checkbox" checked={settings.touch_wave_enabled} onChange={(event) => setSettings({ ...settings, touch_wave_enabled: event.target.checked })} /></label>
